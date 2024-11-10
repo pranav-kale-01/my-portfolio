@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url(https://fonts.googleapis.com/css?family=Quattrocento+Sans);
 
 /* add the code bellow */
 @layer utilities {
@@ -58,4 +59,133 @@ code {
 #glowing-cursor {
   background: radial-gradient(circle, rgba(70, 252, 213, 0.8), rgba(70, 252, 213, 0.7), rgba(70, 252, 213, 0.6), rgba(70, 252, 213, 0.4), transparent); 
   box-shadow: 0 0 24px rgba(70, 252, 213, 0.6), 0 0 32px rgba(70, 252, 213, 0.6);
+}
+
+.glow-button {
+  position: relative;
+  padding: 10px 20px;
+  border-radius: 7px;
+  font-size: 14px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 2px;
+  background: transparent;
+  color: #fff;
+  overflow: hidden;
+  box-shadow: 0 0 0 0 transparent;
+  -webkit-transition: all 0.2s ease-in;
+  -moz-transition: all 0.2s ease-in;
+  transition: all 0.2s ease-in;
+}
+
+.glow-button:hover {
+  background: rgb(61, 106, 255) !important;
+  box-shadow: 0 0 30px 5px rgba(0, 142, 236, 0.815) !important;
+  -webkit-transition: all 0.2s ease-out;
+  -moz-transition: all 0.2s ease-out;
+  transition: all 0.2s ease-out;
+}
+
+.glow-button:hover::before {
+  -webkit-animation: sh02 0.5s 0s linear;
+  -moz-animation: sh02 0.5s 0s linear;
+  animation: sh02 0.5s 0s linear;
+}
+
+.glow-button::before {
+  content: '';
+  display: block;
+  width: 0px;
+  
+  position: absolute;
+  top: 7%;
+  left: 0%;
+  opacity: 0;
+  background: #fff;
+  box-shadow: 0 0 50px 30px #fff;
+  -webkit-transform: skewX(-20deg);
+  -moz-transform: skewX(-20deg);
+  -ms-transform: skewX(-20deg);
+  -o-transform: skewX(-20deg);
+  transform: skewX(-20deg);
+}
+
+.glow-button:active {
+  box-shadow: 0 0 0 0 transparent;
+  -webkit-transition: box-shadow 0.2s ease-in;
+  -moz-transition: box-shadow 0.2s ease-in;
+  transition: box-shadow 0.2s ease-in;
+}
+
+ /* Container to hold the image */
+ .scrolling-image-container {
+  height: 100%;             
+  width: 100%;              
+  overflow: hidden;    
+  position: relative;
+}
+
+.scrolling-image {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: scrollImage 10s ease-in-out infinite;
+}
+
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: 9999;
+}
+
+.loading-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+}
+
+.loading-text-words {
+  color: #fff;
+  font-family: 'Quattrocento Sans', sans-serif;
+  display: inline-block;
+  margin: 0 5px;
+  animation: blur-text 1.5s infinite linear alternate;
+}
+
+@keyframes blur-text {
+  0% { filter: blur(0px); }
+  100% { filter: blur(4px); }
+}
+
+/* Keyframes for vertical scroll */
+@keyframes scrollImage {
+  0% {
+    transform: translate(-50%, 0);
+  }
+  100% {
+    transform: translate(-50%, -60.3%); 
+  }
+}
+
+@keyframes sh02 {
+  from {
+    opacity: 0;
+    left: 0%;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    left: 100%;
+  }
 }

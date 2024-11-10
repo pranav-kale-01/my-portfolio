@@ -1,22 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { GiFallDown } from "react-icons/gi";
 import Spline from "@splinetool/react-spline";
-import ScrollComponent from "../components/ScrollComponent";
-import tflogo from "../assets/tf.png";
-import reactlogo from "../assets/rct.png";
-import flutterlogo from "../assets/flutter.png";
-import pythonlogo from "../assets/python.png";
-import hflogo from "../assets/hf.png";
-import lclogo from "../assets/lc.png";
-import jslogo from "../assets/js.png";
-import javalogo from "../assets/java.png";
-import TechCard from "../components/techCard";
-import SocialsCard from "../components/socialsCard";
-import linkedinlogo from "../assets/linkedin.png";
-import githublogo from "../assets/github.png";
-import gmaillogo from "../assets/gmail.png";
-import twitterlogo from "../assets/twitter.png";
-import instagramlogo from "../assets/insta.png";
+import SocialsComponent from "../components/socialsComponent";
+import ProjectComponent from "../components/projectComponent";
+import TechComponent from "../components/techComponent";
 
 const HomePage = () => {
   // boxes related
@@ -31,77 +18,26 @@ const HomePage = () => {
   // camera related
   const splineCamera = useRef();
   const [initialCameraRotationX, setInitialCameraRotationX] = useState();
-  // const [initialCameraRotationY, setInitialCameraRotationY] = useState();
-  // const [initialCameraRotationZ, setInitialCameraRotationZ] = useState();
 
   // showing scroll down option
   const [showScrollText, setShowScrollText] = useState(true);
-
-  // for rotating them circles
-  const [rotationValue, setRotationValue] = useState();
-  const [sticky, setSticky] = useState();
-
+  const [isLoading, setIsLoading] = useState(true);
   const [y, setY] = useState(window.scrollY);
-  const min = 0;
-  const max = 200;
-  const a = 0;
-  const b = 200;
 
   // Track the last known mouse position
-  let mouseX = 0;
-  let mouseY = 0;
+  const mouseX = useRef(0);
+  const mouseY = useRef(0);
 
   // Update the cursor position with interpolation
-  const updateCursorPosition = (e) => {
-    mouseX = e.pageX;
-    mouseY = e.pageY - window.scrollY;
-  };
+  const updateCursorPosition = useCallback(
+    (e) => {
+      mouseX.current = e.pageX;
+      mouseY.current = e.pageY - window.scrollY;
+    },
+    [mouseX, mouseY]
+  );
 
-  useEffect(() => {
-    const handleScroll = (e) => {
-      // for scroll down text
-      if (showScrollText === true) {
-        setShowScrollText(false);
-      }
-
-      // for background animation
-      moveObj(e);
-      setY(window.scrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [y, moveObj, showScrollText]);
-
-  useEffect(() => {
-    const cursor = document.getElementById("glowing-cursor");
-
-    const animateCursor = () => {
-      if (cursor) {
-        // Directly move the cursor towards the mouse position
-        cursor.style.transform = `translate(${mouseX - 24}px, ${
-          mouseY - 24
-        }px)`;
-      }
-      requestAnimationFrame(animateCursor); // Request the next animation frame
-    };
-
-    // Start the animation loop
-    animateCursor();
-
-    // Event listeners for mousemove
-    document.addEventListener("mousemove", updateCursorPosition);
-
-    // Cleanup event listeners on component unmount
-    return () => {
-      document.removeEventListener("mousemove", updateCursorPosition);
-    };
-  }, []);
-
-  function onLoad(spline) {
+  const onLoad = (spline) => {
     boxes.current = spline.findObjectById(
       "b01f79ce-02e1-4819-9cc3-1959cac3cba5"
     );
@@ -117,7 +53,6 @@ const HomePage = () => {
       glowingCube.current != null &&
       splineCamera.current != null
     ) {
-      // first rotating the boxes
       boxes.current.rotation.y += 0.8;
 
       setInitialRotation(boxes.current.rotation.y);
@@ -126,12 +61,17 @@ const HomePage = () => {
       setInitialCubePosition(glowingCube.current.position.y);
 
       setInitialCameraRotationX(splineCamera.current.rotation.x);
-      // setInitialCameraRotationY(splineCamera.current.rotation.y);
-      // setInitialCameraRotationZ(splineCamera.current.rotation.z);
     }
-  }
 
-  function moveObj(e) {
+    setIsLoading(false);
+  };
+
+  const moveObj = useCallback(() => {
+    const min = 0;
+    const max = 200;
+    const a = 0;
+    const b = 200;
+
     if (
       boxes.current != null &&
       glowingCube.current != null &&
@@ -163,7 +103,56 @@ const HomePage = () => {
         boxes.current.rotation.y = initialRotation + scaledOffset / 1000;
       }
     }
-  }
+  }, [
+    initialCameraRotationX,
+    initialCubePosition,
+    initialCubeScale,
+    initialRotation,
+  ]);
+
+  useEffect(() => {
+    const handleScroll = (e) => {
+      // for scroll down text
+      if (showScrollText === true) {
+        setShowScrollText(false);
+      }
+
+      // for background animation
+      moveObj();
+      setY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [y, moveObj, showScrollText]);
+
+  useEffect(() => {
+    const cursor = document.getElementById("glowing-cursor");
+
+    const animateCursor = () => {
+      if (cursor) {
+        // Directly move the cursor towards the mouse position
+        cursor.style.transform = `translate(${mouseX.current - 24}px, ${
+          mouseY.current - 24
+        }px)`;
+      }
+      requestAnimationFrame(animateCursor); // Request the next animation frame
+    };
+
+    // Start the animation loop
+    animateCursor();
+
+    // Event listeners for mousemove
+    document.addEventListener("mousemove", updateCursorPosition);
+
+    // Cleanup event listeners on component unmount
+    return () => {
+      document.removeEventListener("mousemove", updateCursorPosition);
+    };
+  }, [mouseX, mouseY, updateCursorPosition]);
 
   return (
     <div className="relative cursor-none">
@@ -171,6 +160,20 @@ const HomePage = () => {
         id="mainContainer"
         className="stacked-container flex flex-col bg-black"
       >
+        {isLoading && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black z-50">
+            <div className="flex space-x-2 text-white font-quattrocento-sans">
+              <span className="loading-text-words animate-blur">L</span>
+              <span className="loading-text-words animate-blur">O</span>
+              <span className="loading-text-words animate-blur">A</span>
+              <span className="loading-text-words animate-blur">D</span>
+              <span className="loading-text-words animate-blur">I</span>
+              <span className="loading-text-words animate-blur">N</span>
+              <span className="loading-text-words animate-blur">G</span>
+            </div>
+          </div>
+        )}
+
         {/* Background Spline */}
         <div className="fixed h-full w-full">
           <Spline
@@ -211,9 +214,9 @@ const HomePage = () => {
 
             {/* First Information Container */}
             <div className="flex flex-col items-end w-full h-[4%]">
-              <div className="flex flex-col p-16 text-white items-start w-2/4 mt-48 mr-24 h-full bg-gray-800 rounded-md bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-10">
-                <h2 className="text-5xl pt-6">I am a Software Engineer</h2>
-                <p className="py-6 text-2xl text-left">
+              <div className="flex flex-col p-16 text-white items-start w-1/3 mt-48 mr-24 h-full bg-gray-800 rounded-md bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-10">
+                <h2 className="text-4xl pt-6">I am a Software Engineer</h2>
+                <p className="py-6 text-xl text-left">
                   {" "}
                   Who also loves to explore new things in domains like AI and
                   Machine Learning.{" "}
@@ -223,79 +226,11 @@ const HomePage = () => {
 
             {/* Four Contains  */}
             <div className="w-full h-[5.5%] p-16 mt-[15%]">
-              <ScrollComponent text="I Love to Work With">
-                <TechCard image={tflogo} altText={"TensorFlow"} />
-                <TechCard image={reactlogo} altText={"React"} />
-                <TechCard image={flutterlogo} altText={"Flutter"} />
-                <TechCard image={jslogo} altText={"JavaScript"} />
-                <TechCard image={pythonlogo} altText={"Python"} />
-                <TechCard image={hflogo} altText={"HuggingFace"} />
-                <TechCard image={lclogo} altText={"LangChain"} />
-                <TechCard image={javalogo} altText={"Java"} />
-                <div className="w-[400px]"></div> {/* Empty div for padding */}
-              </ScrollComponent>
+              <TechComponent />
 
-              <div className="w-full h-[180vh] p-16 mt-[15%] bg-emerald-500 opacity-30"></div>
+              <ProjectComponent />
 
-              <div className="w-full h-[5.5%] p-16 mt-[15%]">
-                <ScrollComponent
-                  text={"You can find me on any of these Platform"}
-                >
-                  <SocialsCard
-                    image={linkedinlogo}
-                    altText="Linkedin"
-                    link="https://www.linkedin.com/in/pranavkale013/"
-                  >
-                    {" "}
-                  </SocialsCard>
-                  <SocialsCard
-                    image={githublogo}
-                    altText="Github"
-                    link="https://www.linkedin.com/in/pranav-kale-8b1b4a1b6/"
-                  >
-                    {" "}
-                  </SocialsCard>
-                  <SocialsCard
-                    image={twitterlogo}
-                    altText="X / Twitter"
-                    link="https://x.com/pranavkale013"
-                  >
-                    {" "}
-                  </SocialsCard>
-                  <SocialsCard
-                    image={gmaillogo}
-                    altText="Mail"
-                    link="mailto:pranavkale021998@gmail.com"
-                  >
-                    {" "}
-                  </SocialsCard>
-                  <SocialsCard
-                    image={instagramlogo}
-                    altText="Instagram"
-                    link="https://www.instagram.com/"
-                  >
-                    {" "}
-                  </SocialsCard>
-                  <SocialsCard
-                    image={linkedinlogo}
-                    altText="Linkedin"
-                    link="https://www.linkedin.com/in/pranavkale013/"
-                  >
-                    {" "}
-                  </SocialsCard>
-                  <SocialsCard
-                    image={githublogo}
-                    altText="Github"
-                    link="https://www.linkedin.com/in/pranav-kale-8b1b4a1b6/"
-                  >
-                    {" "}
-                  </SocialsCard>
-                  <div className="w-[1000px]"></div>{" "}
-                  {/* Empty div for padding */}
-                </ScrollComponent>
-              </div>
-
-              <div className="w-screen px-12 bg-emerald-500 h-screen mt-[130%] -translate-x-[3%]"></div>
+              <SocialsComponent />
             </div>
           </div>
         </div>
